@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:notesapp/cubits/add_note_cubit/add_note_cubit.dart';
 import 'package:notesapp/models/note_model.dart';
+import 'package:notesapp/widgets/colors_list_view.dart';
 import 'package:notesapp/widgets/custom_button.dart';
+import 'package:notesapp/widgets/custom_date.dart';
 import 'package:notesapp/widgets/custom_text_field.dart';
 
 class AddNoteForm extends StatefulWidget {
@@ -47,32 +49,13 @@ class _AddNoteFormState extends State<AddNoteForm> {
                   subTitle = value;
                 },
               ),
+              const ColorsListView(),
               const SizedBox(
                 height: 64,
               ),
               BlocBuilder<AddNoteCubit, AddNoteState>(
                 builder: (context, state) {
-                  return CustomButton(
-                    isLoading: state is AddNoteLoading ? true : false,
-                    onTap: () {
-                      if (formkey.currentState!.validate()) {
-                        formkey.currentState!.save();
-                        var currentDate = DateTime.now();
-                        var formattedCurrentDate =
-                            DateFormat('yyyy-MM-dd').format(currentDate);
-                        var noteModel = NoteModel(
-                            title: title!,
-                            subtitle: subTitle!,
-                            date: formattedCurrentDate,
-                            color: Colors.blue.value);
-                        BlocProvider.of<AddNoteCubit>(context)
-                            .addNote(noteModel);
-                      } else {
-                        autovalidateMode = AutovalidateMode.always;
-                        setState(() {});
-                      }
-                    },
-                  );
+                  return submitbuttom(state, context);
                 },
               ),
               const SizedBox(
@@ -82,4 +65,33 @@ class _AddNoteFormState extends State<AddNoteForm> {
           ));
     });
   }
+
+  CustomButton submitbuttom(AddNoteState state, BuildContext context) {
+    return CustomButton(
+      isLoading: state is AddNoteLoading ? true : false,
+      onTap: () {
+        if (formkey.currentState!.validate()) {
+          formkey.currentState!.save();
+          String formattedCurrentDate = editDate();
+          NoteModel noteModel = sumbitNoteModel(formattedCurrentDate);
+          BlocProvider.of<AddNoteCubit>(context).addNote(noteModel);
+        } else {
+          autovalidateMode = AutovalidateMode.always;
+          setState(() {});
+        }
+      },
+    );
+  }
+
+  NoteModel sumbitNoteModel(String formattedCurrentDate) {
+    var noteModel = NoteModel(
+        title: title!,
+        subtitle: subTitle!,
+        date: formattedCurrentDate,
+        color: Colors.blue.value);
+    return noteModel;
+  }
+
+
 }
+
